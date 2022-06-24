@@ -1,0 +1,431 @@
+<!-- <script src="./epub.min.js"></script> -->
+<!-- var link = 'https://gerhardsletten.github.io/react-reader/files/alice.epub' -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EPUB.js</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.5/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
+  <!-- <script src="./epub.min.js"></script> -->
+
+  <style type="text/css">
+    body {
+      margin: 0;
+    background: #fafafa;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color: #333;
+  
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    min-height: 800px;
+    }
+
+    #viewer.spread {
+      width: 900px;
+      height: 600px;
+      box-shadow: 0 0 4px #ccc;
+      border-radius: 5px;
+      padding: 0;
+    }
+    #viewer .epub-view > iframe {
+      background: white;
+  }
+  </style>
+</head>
+
+<body oncopy='return false' oncut='return false'>
+  <div id="viewer" class="spread" ></div>
+  <button id="prev">Prev</button>
+  <button id="next">Next</button>
+  <button id="increase">++</button>
+  <button id="reset">reset</button>
+  <button id="decrease">--</button>
+
+  <script>
+    function _ready() {
+
+      var sendMessage = function (obj) {
+
+      };
+
+      var book;
+      var rendition;
+      var content;
+      var viewFrame;
+
+      var isLoader = false;
+
+      var minSpreadWidth = 815;
+      var currentLocation = "";
+
+      (function openEpub() {
+        // var settings = {
+        // width: "100%",
+        // height: "100%",
+        // };
+
+
+
+        // var link = 'https://shreyas-tarento.github.io/test/test1/test1.epub';
+        // var link = 'https://shreyas-tarento.github.io/test/test1/extracted/OEBPS/package.opf';
+        // var link = 'https://shreyas-tarento.github.io/test/test4/OEBPS/9789173339582.opf';
+        // var link = "https://ebokhyllastoragedev.blob.core.windows.net/svenskbdocumentdev/test4/OEBPS/9789173339582.opf?sp=r&st=2022-03-16T04:46:49Z&se=2022-03-16T12:46:49Z&spr=https&sv=2020-08-04&sr=b&sig=lo1DO9XUDMsNhKcQfrUVjkQ462vWeoXwc4irzyGw2rE%3D";
+
+        // var link = "https://ebokhyllastoragedev.blob.core.windows.net/svenskbdocumentdev/test4/OEBPS/9789173339582.opf"
+        // var link = "https://ebokhyllastoragedev.blob.core.windows.net/svenskbdocumentdev/test123/OEBPS/package.opf";
+
+        // var link = "https://ebokhyllastoragedev.blob.core.windows.net/epubfiles?sp=r&st=2022-03-17T05:13:39Z&se=2022-03-17T13:13:39Z&spr=https&sv=2020-08-04&sr=c&sig=I9hycFarvjoTrzIM%2BAhSaxeXGepDCJjRjgJZYGWV4eA%3D/116OTU3WVd4cFkyVkVlVzVoYldsakxtVndkV0k9LmVwdWI=/content.opf";
+        // var link ="https://ebokhyllastoragedev.blob.core.windows.net/epubfiles/116OTU3WVd4cFkyVkVlVzVoYldsakxtVndkV0k9LmVwdWI%3D/content.opf?sp=r&st=2022-03-17T05:22:28Z&se=2022-03-17T13:22:28Z&spr=https&sv=2020-08-04&sr=b&sig=iaYsMdagmv5vgAvsDLJFAYxDr5qqMGvmirFlNzDO0hs%3D"
+
+        var BOOK_STORAGE_URL = "https://ebokhyllanstorageprod.blob.core.windows.net/extractedepub/"
+          var FONT_SIZE = 100;
+        // var link = "test/OEBPS/9789173339575.opf"
+        // var link = "test/package.opf";
+        var link = "https://s3.amazonaws.com/epubjs/books/moby-dick/OPS/package.opf"
+
+        // var link = "https://ebokhyllastoragedev.blob.core.windows.net/extractedepub/102RS1CT0sgU8OlIGJ5Z2dkZXMgc3RhZGVuLiBVdGcgNA==/OEBPS/package.opf";
+        var link2 = "https://ebokhyllanstorageprod.blob.core.windows.net/extractedepub/259RS1CT0tfMzAwX2ZyYWdvcl85Nzg5MTczMzM5NTgyX0VQVUIzLmVwdWI=/OEBPS/9789173339582.opf";
+        var link3 = "https://ebokhyllastoragedev.blob.core.windows.net/extractedepub/773OTc4OTE3OTE3MDUzMF9FUFVCMy5lcHVi/OEBPS/9789179170530.opf";
+        // var link = "https://ebokhyllastoragedev.blob.core.windows.net/extractedepub/259RS1CT0tfMzAwX2ZyYWdvcl85Nzg5MTczMzM5NTgyX0VQVUIzLmVwdWI=/OEBPS/testing.opf"
+
+        window.book =  book = ePub(link2);
+     window.rendition= rendition = book.renderTo("viewer", {
+      width: "100%",
+      height: 600,
+      spread: "always"
+    });
+
+        var displayed = rendition.display();
+
+        var allLinks = document.links;
+
+        console.log("myLinkClicked", allLinks);
+
+        // Bind the event handler to each link individually
+        for (var i = 0, n = allLinks.length; i < n; i++) {
+          //allLinks[i].addEventListener('click', function (event) {});
+          allLinks[i].onclick = function () {
+            // Do something    
+            console.log("myLinkClicked", true);
+          };
+        }
+
+        displayed.then(function (renderer) {
+
+          // rendition.themes.register({ theme: window.THEME });
+          // rendition.themes.select('theme');
+
+        })
+          .catch(function (reason) {
+
+          });
+
+
+        window.book.loaded.navigation.then(function (toc) {
+
+        });
+
+        if (window.LOCATIONS) {
+          window.book.locations.load(window.LOCATIONS);
+        } else {
+          window.book.ready.then(() => {
+            window.book.locations.generate(1650).then((val) => {
+            }).catch((e) => {
+
+            });
+          }).catch((e) => {
+
+          });
+        }
+
+        rendition.on('started', () => {
+          window.rendition.display(window.BOOK_LOCATION)
+
+          rendition.themes.register({ theme: window.THEME });
+          rendition.themes.select('theme');
+
+        });
+
+        rendition.on('attached', () => {
+
+        });
+
+
+
+
+        rendition.on('started', () => {
+          console.log("myRendtionCheck", "started");
+        })
+        rendition.on('attached', async () => {
+          console.log("myRendtionCheck", "attached");
+
+          if (link2) {
+            let opfPath = link2;
+            let _filename = opfPath.split("/").pop();
+            console.log("myOpfPath", _filename);
+            let _path = opfPath.replace(_filename, "");
+            console.log("myOpfPath", _path);
+            await Promise.all(
+              book?.resources?.assets?.map(async (val) => {
+                if (val?.type?.includes("image")) {
+                  await new Promise(resolve => {
+                    const img = new Image();
+                    img.src = _path + val?.href;
+                    img.onload = () => {
+                      resolve(true);
+                    };
+                  });
+                }
+              })
+            );
+          }
+
+        })
+        rendition.on('displayed', (section) => {
+          console.log("myRendtionCheck", "displayed");
+        })
+        rendition.on('displayError', (section) => {
+          console.log("myRendtionCheck", "displayError");
+        })
+        rendition.on('rendered', (section, view) => {
+          currentLocation = rendition.currentLocation();
+          rendition.themes.default({
+            img: {
+              "max-width": "100% !important",
+              "height": "auto !important",
+              "cursor": "pointer",
+            },
+            td: {
+              "font-size": "60%",
+            },
+            body: {
+              "word-break": "break-all",
+              "hyphens": "auto",
+              "text-align": "start",
+              "-webkit-hyphens": "auto",
+              "-webkit-hyphenate-character": "#-",
+              "-webkit-hyphenate-limit-after": "1",
+              "-webkit-hyphenate-limit-before": "3",
+              "-moz-hyphens": "auto",
+            },
+            p: {
+              "text-align": "start !important"
+            }
+          });
+          isLoader = false;
+          console.log("myRendtionCheck", "rendered");
+          initializeIframeListener(view);
+        })
+        rendition.on('removed', (section, view) => {
+          console.log("myRendtionCheck", "removed");
+        })
+        rendition.on('resized', (width, height) => {
+          console.log("myRendtionCheck", "resized");
+        })
+        rendition.on('locationChanged', ({index, href, start, end, percentage}) => {
+          console.log("myRendtionCheck", "locationChanged", index, href, start, end, percentage);
+        })
+        rendition.on('relocated', () => {
+          console.log("myRendtionCheck", "relocated");
+        })
+
+        function initializeIframeListener(iframe) {
+          console.log("myscreensoffset iframe", iframe);
+          removeIframeListener();
+          viewFrame = iframe;
+          setTimeout(() => {
+            iframe.document.addEventListener("click", onIFrameClick);
+          }, 100)
+        };
+
+        function removeIframeListener() {
+          console.log("myUnload 9999 ", viewFrame);
+          if (viewFrame) {
+            viewFrame.document.documentElement.removeEventListener(
+              "click",
+              onIFrameClick,
+              true
+            );
+          }
+        }
+
+        function onIFrameClick(event) {
+          console.log("myVFrameChekc 111 ", event?.target?.src);
+          const tagName = ["img"].find(
+            (x) => x === event?.target?.tagName?.toLowerCase()
+          );
+
+          if (tagName) {
+            const source = event?.target?.src;
+            // dispatch(setAssetModel(source));
+            console.log("myimageSource", source);
+          }
+        };
+
+
+        document.addEventListener("click", () => {
+          console.log("myLoaderer ", isLoader);
+
+        })
+
+
+
+        //file:///OEBPS/xhtml/upphovsratt.xhtml
+
+        rendition.on('rendered', (section, view) => {
+
+          console.log("mySections 111 ", section, view);
+
+          var allLinks = view.document.links;
+          // for (var i = 0, n = allLinks.length; i < n; i++) {
+          //   allLinks[i].onclick = function (e) {
+          //     var href = e.currentTarget?.getAttribute("href")
+          //     console.log("qqqqqqqq 222", e.data);
+          //     return false
+          //     // rendition.display(href)
+          //       // if(href){
+          //       //   var linkArray = href.split("/");
+          //       //   var isValidXHTML = linkArray?.includes("xhtml");
+          //       //   if(isValidXHTML){
+          //       //     var link= linkArray?.[linkArray.length-1];
+          //       //     rendition.display("xhtml/"+link)
+          //       //   }
+          //       // }  
+          //   };
+          // }
+          console.log("render");
+          view.document.documentElement.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            console.log("contextMenu");
+          });
+          view.document.documentElement.addEventListener("touchStart", (e) => {
+            e.preventDefault();
+            console.log("touchStart");
+          });
+          view.document.documentElement.addEventListener("touchend", (e) => {
+            e.preventDefault();
+            console.log("touchend", e, e.pageX, e.pageY, e.originalEvent);
+          });
+          view.document.documentElement.addEventListener("touchmove", (e) => {
+            e.preventDefault();
+            console.log("touchmove");
+          });
+
+        });
+
+        rendition.on('relocated', function (e) {
+
+        });
+
+        rendition.on("selected", function (cfi, contents) {
+
+
+          var result = false;
+          var TEXT = "#text";
+          var extentNodeOuterText = contents?.window?.getSelection()?.extentNode?.outerText;
+          var focusNodeOuterText = contents?.window?.getSelection()?.focusNode?.outerText;
+          var extentNodeNodeName = contents?.window?.getSelection()?.extentNode?.nodeName;
+          var focusNodeNodeName = contents?.window?.getSelection()?.focusNode?.nodeName;
+
+          console.log(
+            "myText is ",
+            extentNodeNodeName,
+            focusNodeNodeName,
+            extentNodeOuterText,
+            focusNodeOuterText
+          );
+
+          if (false) {
+            result = false;
+          } else if (extentNodeNodeName === TEXT || focusNodeNodeName === TEXT) {
+            result = true;
+          } else if (extentNodeOuterText && focusNodeOuterText) {
+            result = true;
+          } else if (extentNodeNodeName === TEXT || focusNodeNodeName === TEXT) {
+            result = false;
+          } else if (!extentNodeOuterText && !focusNodeOuterText) {
+            result = false;
+          } else {
+            result = true;
+          }
+
+        });
+
+
+
+        rendition.on("markClicked", function (cfiRange, data) {
+        });
+
+        rendition.on("added", function (section) {
+        });
+
+        rendition.on("removed", function (section) {
+        });
+
+        rendition.on("resized", function (size) {
+        });
+
+        book.ready.then(function () {
+        });
+
+        document.getElementById("prev").onclick = () => {
+          isLoader = true;
+          rendition.prev();
+        }
+
+        document.getElementById("next").onclick = () => {
+          isLoader = true;
+          rendition.next();
+        }
+
+        document.getElementById("increase").onclick = () => {
+          FONT_SIZE = FONT_SIZE + 5;
+          rendition.themes.fontSize(FONT_SIZE + "%");
+        }
+
+        document.getElementById("reset").onclick = () => {
+          FONT_SIZE = 100;
+          rendition.themes.fontSize(FONT_SIZE + "%");
+
+          let spineItem = book.spine.get(currentLocation.start.cfi);
+
+
+          
+
+        }
+
+        document.getElementById("decrease").onclick = () => {
+          FONT_SIZE = FONT_SIZE - 5;
+          rendition.themes.fontSize(FONT_SIZE + "%");
+        }
+        window.addEventListener("unload", function () {
+          console.log("myUnload 22222", true);
+          removeIframeListener();
+          book && book.destroy();
+        });
+
+      })();
+
+
+    };
+
+    window.addEventListener("load", _ready, false);
+
+
+  </script>
+</body>
+
+</html>
+
+
+
+
+main = {
+fav:[],
+bok:[]
+}
